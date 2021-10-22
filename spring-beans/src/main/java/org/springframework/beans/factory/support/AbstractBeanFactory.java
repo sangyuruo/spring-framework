@@ -1328,6 +1328,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 
 	/**
+	 * 可以看到, Spring会先从mergedBeanDefinitions中获取, 从而可以很号的联想到,
+	 * 在对一个BeanDifinition进行合并完成后, Spring都会将合并后的BeanDifinition放入到这个Map中,
+	 * 如果在缓存中没有拿到, 则先调用getBeanDefinition方法从beanDefintionsMap中获取原始的BeanDefinition,
+	 * 如果对Spring扫描bean的代码有所了解的话, 就会明白当一个bean被扫描出来变成一个beanDefintion后就会放入到beanDefintionsMap中
+	 *
 	 * Return a merged RootBeanDefinition, traversing the parent bean definition
 	 * if the specified bean corresponds to a child bean definition.
 	 * @param beanName the name of the bean to retrieve the merged definition for
@@ -1363,8 +1368,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * parent if the given bean's definition is a child bean definition.
 	 * @param beanName the name of the bean definition
 	 * @param bd the original bean definition (Root/ChildBeanDefinition)
+	 *           源bean definition
 	 * @param containingBd the containing bean definition in case of inner bean,
 	 * or {@code null} in case of a top-level bean
+	 * 如果bd(源bean definition）是一个内部Bean，则containingBd不为空，如果它是一个顶级Bean，则containingBd为null.
+	 * 可以理解containingBd是 包含bd的 Bean的 bean definition
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
@@ -1378,31 +1386,65 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			// Check with full lock now in order to enforce the same merged instance.
 			if (containingBd == null) {
+				//bd为 top-level bean
 				mbd = this.mergedBeanDefinitions.get(beanName);
 			}
 
 			if (mbd == null || mbd.stale) {
 				previous = mbd;
 				if (bd.getParentName() == null) {
+					/**
+					 * 如果一个BeanDefinition没有设置parentName, 表示该beanDefinition是没有父BeanDefinition的.
+					 * 此时会直接根据 bd 创建一个 RootBeanDefinition。
+					 */
 					// Use copy of given root bean definition.
 					if (bd instanceof RootBeanDefinition) {
+						/**
+						 * 如果一个BeanDefinition是RootBeanDefinition的子类,
+						 * 那么调用克隆方法的时候, 就会new一个该子类, 然后开始克隆, 会从下往上执行 super(bd)。
+						 * 比如new ConfigurationClassBeanDefinition(this)
+						 */
 						mbd = ((RootBeanDefinition) bd).cloneBeanDefinition();
 					}
 					else {
+						/**
+						 * 它也是创建一个RootBeanDefinition，
+						 * 不同的是:
+						 * 它实际执行的是 AbstractBeanDefinition(bd)。
+						 * 而上面（if中）会执行 子类本身的 构造函数方法，还会通过super(bd)从下往上一直执行到 RootBeanDefinition的构造函数
+						 */
 						mbd = new RootBeanDefinition(bd);
 					}
 				}
 				else {
+					/**
+					 * 分析:
+					 *   如果一个BeanDefinition有父类, 那么Spring就会获取到父类的beanName(因为可能存在别名, 所以调用了
+					 *   transformedBeanName方法),
+					 *   如果父类的beanName和当前BeanName不一样, 说明是存在真正的父类的,
+					 *   这个判断是用来防止由于程序员将当前beanName设置为当前BeanDefinition的父类而导致死循环的, 如果真正
+					 *   存在父类, Spring就会先将父类合并了, 因为父类可能还有父类, 该递归方法结束后就能获取到一个完整的父
+					 *   BeanDefinition了, 然后new了一个RootBeanDefinition, 将完整的父BeanDefinition放入进去, 从而初步
+					 *   完成了合并
+					 *
+					 *   上面有一个else判断, 是对存在有父容器情况的处理, 对于Spring的父容器, 笔者也不太清楚, 就不展开讲解
+					 *
+					 *   当完成了初步的合并后, Spring调用overrideFrom进行了深入的复制, 这里面的代码也很简单, 大家有兴趣
+					 *   可以看看, 就是大量的mbd.setXXX(bd.getXXX)
+					 */
 					// Child bean definition: needs to be merged with parent.
 					BeanDefinition pbd;
 					try {
 						String parentBeanName = transformedBeanName(bd.getParentName());
 						if (!beanName.equals(parentBeanName)) {
+							//如果父类的beanName和当前BeanName不一样, 说明是存在真正的父类的
+							//循环找到父类 BeanDefinition
 							pbd = getMergedBeanDefinition(parentBeanName);
 						}
 						else {
 							BeanFactory parent = getParentBeanFactory();
 							if (parent instanceof ConfigurableBeanFactory) {
+								//循环找到父类 BeanDefinition
 								pbd = ((ConfigurableBeanFactory) parent).getMergedBeanDefinition(parentBeanName);
 							}
 							else {
