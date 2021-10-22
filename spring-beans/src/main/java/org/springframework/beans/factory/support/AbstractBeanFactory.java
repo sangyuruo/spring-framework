@@ -1328,6 +1328,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 
 	/**
+	 * 可以理解成是 BeanDefinitions 的继承关系实现。如果不处理的话，子类定义中会丢失掉父类中的属性等定义
+	 *
 	 * 可以看到, Spring会先从mergedBeanDefinitions中获取, 从而可以很号的联想到,
 	 * 在对一个BeanDifinition进行合并完成后, Spring都会将合并后的BeanDifinition放入到这个Map中,
 	 * 如果在缓存中没有拿到, 则先调用getBeanDefinition方法从beanDefintionsMap中获取原始的BeanDefinition,
@@ -1442,6 +1444,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							pbd = getMergedBeanDefinition(parentBeanName);
 						}
 						else {
+							//解决当 beanName == parentBeanName时的 死循环问题
 							BeanFactory parent = getParentBeanFactory();
 							if (parent instanceof ConfigurableBeanFactory) {
 								//循环找到父类 BeanDefinition
@@ -1483,6 +1486,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 			if (previous != null) {
+				//这里还需要理解下
 				copyRelevantMergedBeanDefinitionCaches(previous, mbd);
 			}
 			return mbd;
