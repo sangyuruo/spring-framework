@@ -317,6 +317,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
+	 * 判断beanName对应的Bean是否有资格被代理
 	 * Wrap the given bean if necessary, i.e. if it is eligible for being proxied.
 	 * @param bean the raw bean instance
 	 * @param beanName the name of the bean
@@ -325,12 +326,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
 		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
+			//targetSourcedBeans已经包含该Bean
 			return bean;
 		}
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
+			//advisedBeans存放了之前已经判断没有代理资格的Bean
 			return bean;
 		}
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
+			//它是AOP基础类(Advice,Advisor等)或者是需要忽略的Bean
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
 		}
