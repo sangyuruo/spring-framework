@@ -228,6 +228,8 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 */
 	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		String methodName = "[loadContext]: ";
+		logger.info( methodName + "从候选者(SmartContextLoader)列表中加载 ApplicationContext");
 		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
 
 		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
@@ -236,10 +238,12 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 				name(getAnnotationConfigLoader()), mergedConfig));
 
 		SmartContextLoader[] candidates = {getXmlLoader(), getAnnotationConfigLoader()};
+		logger.info( methodName + "SmartContextLoader candidates 数量为 " + candidates.length);
 		for (SmartContextLoader loader : candidates) {
 			// Determine if each loader can load a context from the mergedConfig. If it
 			// can, let it; otherwise, keep iterating.
 			if (supports(loader, mergedConfig)) {
+				logger.info( methodName + "选中 candidate loader 为 " + loader.getClass().getName());
 				return delegateLoading(loader, mergedConfig);
 			}
 		}
@@ -268,7 +272,8 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 
 	private static ApplicationContext delegateLoading(SmartContextLoader loader, MergedContextConfiguration mergedConfig)
 			throws Exception {
-
+		String methodName = "[delegateLoading]: ";
+		logger.info( methodName + " 通过 loader(SmartContextLoader?).loadContext 取 ApplicationContext");
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
 		}

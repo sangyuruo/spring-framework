@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
@@ -41,6 +43,7 @@ import org.springframework.util.StringUtils;
  * @since 4.0
  */
 public class DefaultTestContext implements TestContext {
+	static Logger logger = LoggerFactory.getLogger(DefaultTestContext.class);
 
 	private static final long serialVersionUID = -5827157174866681233L;
 
@@ -121,6 +124,8 @@ public class DefaultTestContext implements TestContext {
 	 */
 	@Override
 	public ApplicationContext getApplicationContext() {
+		String methodName = "[getApplicationContext]: ";
+		logger.info( methodName + " 通过 cacheAwareContextLoaderDelegate.loadContext 取 spring context ... ");
 		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
 		if (context instanceof ConfigurableApplicationContext) {
 			@SuppressWarnings("resource")

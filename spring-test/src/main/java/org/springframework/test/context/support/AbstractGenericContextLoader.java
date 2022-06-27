@@ -103,6 +103,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 */
 	@Override
 	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		String methodName = "[loadContext]: ";
+		logger.info(methodName + " 最终取 ConfigurableApplicationContext");
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Loading ApplicationContext for merged context configuration [%s].",
 					mergedConfig));

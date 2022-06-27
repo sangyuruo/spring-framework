@@ -43,6 +43,8 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.annotation.Testable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.ParameterResolutionDelegate;
 import org.springframework.context.ApplicationContext;
@@ -78,7 +80,7 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 public class SpringExtension implements BeforeAllCallback, AfterAllCallback, TestInstancePostProcessor,
 		BeforeEachCallback, AfterEachCallback, BeforeTestExecutionCallback, AfterTestExecutionCallback,
 		ParameterResolver {
-
+	private static final Logger logger = LoggerFactory.getLogger(SpringExtension.class);
 	/**
 	 * {@link Namespace} in which {@code TestContextManagers} are stored, keyed
 	 * by test class.
@@ -134,6 +136,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 */
 	@Override
 	public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
+		String methodName = "[postProcessTestInstance]: ";
+		logger.info( methodName + " prepareTestInstance ... ");
 		validateAutowiredConfig(context);
 		getTestContextManager(context).prepareTestInstance(testInstance);
 	}

@@ -61,6 +61,7 @@ class MockServerHttpRequestTests {
 				.build();
 
 		assertThat(request.getURI().toString()).isEqualTo("/foo%20bar?a=b&name%20A=value%20A1&name%20A=value%20A2&name%20B=value%20B1");
+//		assertThat(request.getURI().toString()).isEqualTo("/foo%20bar?a=b&name%20A=value%20A1&name%20A=value%20A2&name%20B=value%20B12");
 	}
 
 	@ParameterizedTest

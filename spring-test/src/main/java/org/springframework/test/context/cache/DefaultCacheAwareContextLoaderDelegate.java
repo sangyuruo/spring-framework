@@ -87,7 +87,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 */
 	protected ApplicationContext loadContextInternal(MergedContextConfiguration mergedContextConfiguration)
 			throws Exception {
-
+		String methodName = "[loadContextInternal]: ";
+		logger.info( methodName + "通过 ContextLoader 取 applicationContext");
 		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
 		Assert.notNull(contextLoader, "Cannot load an ApplicationContext with a NULL 'contextLoader'. " +
 				"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
@@ -95,6 +96,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		ApplicationContext applicationContext;
 
 		if (contextLoader instanceof SmartContextLoader) {
+			logger.info(methodName + "它是 SmartContextLoader, 调用 smartContextLoader.loadContext");
 			SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
 			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
 		}
@@ -117,9 +119,12 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) {
+		String methodName = "[loadContext]: ";
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
+			logger.info( methodName + "从缓存中取 applicationContext");
 			if (context == null) {
+				logger.info( methodName + "缓存中没有 applicationContext，调用loadContextInternal去拿applicationContext");
 				try {
 					context = loadContextInternal(mergedContextConfiguration);
 					if (logger.isDebugEnabled()) {

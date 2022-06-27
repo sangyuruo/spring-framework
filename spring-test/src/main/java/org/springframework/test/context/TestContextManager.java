@@ -234,6 +234,7 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(Object testInstance) throws Exception {
+		String methodName = "[prepareTestInstance]: ";
 		if (logger.isTraceEnabled()) {
 			logger.trace("prepareTestInstance(): instance [" + testInstance + "]");
 		}
@@ -241,6 +242,7 @@ public class TestContextManager {
 
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
+				logger.info( methodName + " 调用 testExecutionListener.prepareTestInstance ... ");
 				testExecutionListener.prepareTestInstance(getTestContext());
 			}
 			catch (Throwable ex) {

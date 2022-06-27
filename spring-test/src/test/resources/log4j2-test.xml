@@ -10,11 +10,12 @@
 	</Appenders>
 	<Loggers>
 		<Logger name="org.junit.platform" level="info" />
+		<Logger name="org.springframework.test.context.support" level="info" />
 		<Logger name="org.springframework.test.context" level="warn" />
 		<Logger name="org.springframework.test.context.TestContext" level="warn" />
 		<Logger name="org.springframework.test.context.TestContextManager" level="warn" />
 		<Logger name="org.springframework.test.context.ContextLoaderUtils" level="warn" />
-		<Logger name="org.springframework.test.context.cache" level="warn" />
+		<Logger name="org.springframework.test.context.cache" level="info" />
 		<Logger name="org.springframework.test.context.junit4.rules" level="warn" />
 		<Logger name="org.springframework.test.context.transaction.TransactionalTestExecutionListener" level="warn" />
 		<Logger name="org.springframework.test.context.web" level="warn" />

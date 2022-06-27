@@ -77,9 +77,11 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 */
 	@Override
 	public void prepareTestInstance(TestContext testContext) throws Exception {
+		String methodName = "[prepareTestInstance]: ";
 		if (logger.isDebugEnabled()) {
 			logger.debug("Performing dependency injection for test context [" + testContext + "].");
 		}
+		logger.info( methodName + " 调用 injectDependencies ... ");
 		injectDependencies(testContext);
 	}
 
@@ -113,8 +115,10 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * @see #beforeTestMethod(TestContext)
 	 */
 	protected void injectDependencies(TestContext testContext) throws Exception {
+		String methodName = "[injectDependencies]: ";
 		Object bean = testContext.getTestInstance();
 		Class<?> clazz = testContext.getTestClass();
+		logger.info( methodName + " 通过 testContext.getApplicationContext() 取 beanFactory ... ");
 		AutowireCapableBeanFactory beanFactory = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 		beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		beanFactory.initializeBean(bean, clazz.getName() + AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX);
