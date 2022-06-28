@@ -242,7 +242,7 @@ public class TestContextManager {
 
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
-				logger.info( methodName + " 调用 testExecutionListener.prepareTestInstance ... ");
+				logger.info( methodName + " 调用 testExecutionListener.prepareTestInstance ,类：" + testExecutionListener.getClass().getName());
 				testExecutionListener.prepareTestInstance(getTestContext());
 			}
 			catch (Throwable ex) {
