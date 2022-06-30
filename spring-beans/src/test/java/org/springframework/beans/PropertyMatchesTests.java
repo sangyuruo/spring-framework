@@ -34,6 +34,7 @@ public class PropertyMatchesTests {
 
 	@Test
 	public void simpleBeanPropertyTypo() {
+		//naem 和 name 相似度,  默认maximum property distance: 2
 		PropertyMatches matches = PropertyMatches.forProperty("naem", SampleBeanProperties.class);
 		assertThat(matches.getPossibleMatches()).contains("name");
 	}

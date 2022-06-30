@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
+ * 测试 自定义Autowire配置 - CustomResolver
  * Unit tests for {@link CustomAutowireConfigurer}.
  *
  * @author Mark Fisher
@@ -44,6 +45,7 @@ public class CustomAutowireConfigurerTests {
 
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
 		CustomResolver customResolver = new CustomResolver();
+		//通过customResolver来筛选依赖注入的候选者
 		bf.setAutowireCandidateResolver(customResolver);
 		cac.postProcessBeanFactory(bf);
 		TestBean testBean = (TestBean) bf.getBean("testBean");
@@ -65,8 +67,10 @@ public class CustomAutowireConfigurerTests {
 	}
 
 
+	/**
+	 * 候选者筛选自定义规则
+	 */
 	public static class CustomResolver implements AutowireCandidateResolver {
-
 		@Override
 		public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 			if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {

@@ -79,6 +79,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
+ * 测试Bean注入
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
@@ -117,6 +119,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			.withRootCauseInstanceOf(IllegalStateException.class);
 	}
 
+	/**
+	 * 测试在Field以及方法注入Bean
+	 */
 	@Test
 	public void testResourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(ResourceInjectionBean.class);
@@ -134,6 +139,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean2()).isSameAs(tb);
 	}
 
+	/**
+	 * 测试继承情况下的Bean注入
+	 */
 	@Test
 	public void testExtendedResourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
@@ -166,6 +174,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(depBeans[1]).isEqualTo("nestedTestBean");
 	}
 
+	/**
+	 * 测试继承情况下的Bean注入 -- 有destroy的场景
+	 */
 	@Test
 	public void testExtendedResourceInjectionWithDestruction() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(TypedExtendedResourceInjectionBean.class));
@@ -190,6 +201,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bf.getDependenciesForBean("annotatedBean").length).isSameAs(0);
 	}
 
+	/**
+	 * 测试继承情况下的Bean注入 -- 有重载的场景
+	 */
 	@Test
 	public void testExtendedResourceInjectionWithOverriding() {
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
@@ -203,6 +217,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		TypedExtendedResourceInjectionBean bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isSameAs(tb);
+		//重载场景
 		assertThat(bean.getTestBean2()).isSameAs(tb2);
 		assertThat(bean.getTestBean3()).isSameAs(tb);
 		assertThat(bean.getTestBean4()).isSameAs(tb);
@@ -210,6 +225,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 	}
 
+	/**
+	 * 测试继承情况下的Bean注入 -- 忽略重载方法的场景， 最终子类中去掉了@Autowired
+	 */
 	@Test
 	public void testExtendedResourceInjectionWithSkippedOverriddenMethods() {
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(OverriddenExtendedResourceInjectionBean.class);
@@ -230,6 +248,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.subInjected).isTrue();
 	}
 
+	/**
+	 * 测试使用默认方法注入Bean
+	 */
 	@Test
 	public void testExtendedResourceInjectionWithDefaultMethod() {
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(DefaultMethodResourceInjectionBean.class);
@@ -271,6 +292,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 	}
 
+	/**
+	 * 测试可选的注入 - 数组
+	 */
 	@Test
 	public void testOptionalResourceInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
@@ -297,6 +321,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb2);
 	}
 
+	/**
+	 * 测试注入Bean -- 移除单例Bean后恢复单例的场景
+	 */
 	@Test
 	public void testOptionalResourceInjectionWithSingletonRemoval() {
 		RootBeanDefinition rbd = new RootBeanDefinition(OptionalResourceInjectionBean.class);
@@ -355,6 +382,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb2);
 	}
 
+	/**
+	 * 测试注入Bean -- 移除Bean定义后恢复单例的场景
+	 */
 	@Test
 	public void testOptionalResourceInjectionWithBeanDefinitionRemoval() {
 		RootBeanDefinition rbd = new RootBeanDefinition(OptionalResourceInjectionBean.class);
@@ -412,6 +442,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb2);
 	}
 
+	/**
+	 * 测试多次取同一个Bean
+	 */
 	@Test
 	public void testOptionalCollectionResourceInjection() {
 		RootBeanDefinition rbd = new RootBeanDefinition(OptionalCollectionResourceInjectionBean.class);
@@ -483,10 +516,15 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isSameAs(tb);
 		assertThat(bean.getTestBean2()).isSameAs(tb);
 		assertThat(bean.getTestBean3()).isSameAs(tb);
+		//testBean4 未注入
 		assertThat(bean.getTestBean4()).isNull();
+		//NestedTestBeans 未注入
 		assertThat(bean.getNestedTestBeans()).isNull();
 	}
 
+	/**
+	 * 依赖未注入场景 -- 相关Bean未建立，而这里的依赖声明不是必须的
+	 */
 	@Test
 	public void testOptionalResourceInjectionWithNoDependencies() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
@@ -499,6 +537,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getNestedTestBeans()).isNull();
 	}
 
+	/**
+	 * 根据Order来排序创建的Bean实例 -- 通过接口实现指定Order
+	 */
 	@Test
 	public void testOrderedResourceInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
@@ -506,6 +547,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("testBean", tb);
 		IndexedTestBean itb = new IndexedTestBean();
 		bf.registerSingleton("indexedTestBean", itb);
+		//order越小，排在越前
 		OrderedNestedTestBean ntb1 = new OrderedNestedTestBean();
 		ntb1.setOrder(2);
 		bf.registerSingleton("nestedTestBean1", ntb1);
@@ -520,13 +562,18 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean4()).isSameAs(tb);
 		assertThat(bean.getIndexedTestBean()).isSameAs(itb);
 		assertThat(bean.getNestedTestBeans().length).isEqualTo(2);
+		//order越小，排在越前
 		assertThat(bean.getNestedTestBeans()[0]).isSameAs(ntb2);
 		assertThat(bean.getNestedTestBeans()[1]).isSameAs(ntb1);
 		assertThat(bean.nestedTestBeansField.length).isEqualTo(2);
+		//order越小，排在越前
 		assertThat(bean.nestedTestBeansField[0]).isSameAs(ntb2);
 		assertThat(bean.nestedTestBeansField[1]).isSameAs(ntb1);
 	}
 
+	/**
+	 * 根据Order来排序创建的Bean实例 - 这里用注解指定Order
+	 */
 	@Test
 	public void testAnnotationOrderedResourceInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
@@ -534,6 +581,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("testBean", tb);
 		IndexedTestBean itb = new IndexedTestBean();
 		bf.registerSingleton("indexedTestBean", itb);
+		//order越小，排在越前
 		FixedOrder2NestedTestBean ntb1 = new FixedOrder2NestedTestBean();
 		bf.registerSingleton("nestedTestBean1", ntb1);
 		FixedOrder1NestedTestBean ntb2 = new FixedOrder1NestedTestBean();
@@ -546,6 +594,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean4()).isSameAs(tb);
 		assertThat(bean.getIndexedTestBean()).isSameAs(itb);
 		assertThat(bean.getNestedTestBeans().length).isEqualTo(2);
+		//order越小，排在越前
 		assertThat(bean.getNestedTestBeans()[0]).isSameAs(ntb2);
 		assertThat(bean.getNestedTestBeans()[1]).isSameAs(ntb1);
 		assertThat(bean.nestedTestBeansField.length).isEqualTo(2);
@@ -621,6 +670,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.nestedTestBeansField.get(1)).isSameAs(ntb1);
 	}
 
+	/**
+	 * 测试构造函数注入
+	 */
 	@Test
 	public void testConstructorResourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
@@ -648,6 +700,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 	}
 
+	/**
+	 * 测试构造函数注入 - 先销毁依赖Bean实例然后恢复的场景
+	 */
 	@Test
 	public void testConstructorResourceInjectionWithSingletonRemoval() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
@@ -687,6 +742,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 	}
 
+	/**
+	 * 测试构造函数注入 - 先销毁依赖Bean定义然后恢复的场景
+	 */
 	@Test
 	public void testConstructorResourceInjectionWithBeanDefinitionRemoval() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
@@ -782,6 +840,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 	}
 
+	/**
+	 * 测试构造函数注入 - 多个候选Bean实例的场景
+	 */
 	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidates() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsResourceInjectionBean.class));
@@ -802,6 +863,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void testConstructorResourceInjectionWithNoCandidatesAndNoFallback() {
+		//TODO
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
 				bf.getBean("annotatedBean"))
@@ -1272,6 +1334,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isSameAs(bf.getBean("testBean"));
 	}
 
+	/**
+	 * 测试 ObjectFactory
+	 */
 	@Test
 	public void testObjectFactoryConstructorInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryConstructorInjectionBean.class));
@@ -1281,6 +1346,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isSameAs(bf.getBean("testBean"));
 	}
 
+	/**
+	 * 测试 Prototype
+	 */
 	@Test
 	public void testObjectFactoryInjectionIntoPrototypeBean() {
 		RootBeanDefinition annotatedBeanDefinition = new RootBeanDefinition(ObjectFactoryFieldInjectionBean.class);
@@ -1295,6 +1363,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(anotherBean.getTestBean()).isSameAs(bf.getBean("testBean"));
 	}
 
+	/**
+	 * 测试 @Qualifier 功能
+	 */
 	@Test
 	public void testObjectFactoryQualifierInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryQualifierInjectionBean.class));
@@ -1307,6 +1378,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isSameAs(bf.getBean("dependencyBean"));
 	}
 
+	/**
+	 * 测试 @Qualifier 功能
+	 */
 	@Test
 	public void testObjectFactoryQualifierProviderInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryQualifierInjectionBean.class));
@@ -1319,6 +1393,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isSameAs(bf.getBean("dependencyBean"));
 	}
 
+	/**
+	 * 测试Bean的序列化、反序列化
+	 * @throws Exception
+	 */
 	@Test
 	public void testObjectFactorySerialization() throws Exception {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryFieldInjectionBean.class));
@@ -1502,6 +1580,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(testBeans.get(1)).isSameAs(bf.getBean("testBean1"));
 	}
 
+	/**
+	 * 测试自定义注解 AutowiredAnnotationType（@MyAutowired）
+	 */
 	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjection() {
 		bpp.setAutowiredAnnotationType(MyAutowired.class);
@@ -1517,6 +1598,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isSameAs(tb);
 	}
 
+	/**
+	 * 测试自定义注解 AutowiredAnnotationType（@MyAutowired）-- 依赖Bean未找到的场景
+	 */
 	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound() {
 		bpp.setAutowiredAnnotationType(MyAutowired.class);
@@ -1529,6 +1613,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			.satisfies(fieldDeclaredOn(CustomAnnotationRequiredFieldResourceInjectionBean.class));
 	}
 
+	/**
+	 * 测试自定义注解 AutowiredAnnotationType（@MyAutowired）-- 找到多个依赖Bean的场景
+	 */
 	@Test
 	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenMultipleDependenciesFound() {
 		bpp.setAutowiredAnnotationType(MyAutowired.class);
@@ -1560,6 +1647,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getTestBean()).isSameAs(tb);
 	}
 
+	/**
+	 * 测试自定义注解 AutowiredAnnotationType（@MyAutowired）-- 依赖Bean未找到的场景 - methodParameterDeclaredOn
+	 */
 	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound() {
 		bpp.setAutowiredAnnotationType(MyAutowired.class);
@@ -1572,6 +1662,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			.satisfies(methodParameterDeclaredOn(CustomAnnotationRequiredMethodResourceInjectionBean.class));
 	}
 
+	/**
+	 * 测试自定义注解 AutowiredAnnotationType（@MyAutowired）-- 找到多个依赖Bean的场景 - methodParameterDeclaredOn
+	 * 注意: 使用了自定义的 AutowiredAnnotationType @MyAutowired后， 原来的@Autowired 会失效.
+	 */
 	@Test
 	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound() {
 		bpp.setAutowiredAnnotationType(MyAutowired.class);
@@ -1693,6 +1787,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	 */
 	@Test
 	public void testBeanAutowiredWithFactoryBean() {
+		//TODO 看到这里
 		bf.registerBeanDefinition("factoryBeanDependentBean", new RootBeanDefinition(FactoryBeanDependentBean.class));
 		bf.registerSingleton("stringFactoryBean", new StringFactoryBean());
 
@@ -2359,12 +2454,16 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 
 	public static class ResourceInjectionBean {
-
+		//在field上注入
 		@Autowired(required = false)
 		private TestBean testBean;
 
 		private TestBean testBean2;
 
+		/**
+		 * //在方法上注入
+		 * @param testBean2
+		 */
 		@Autowired
 		public void setTestBean2(TestBean testBean2) {
 			if (this.testBean2 != null) {

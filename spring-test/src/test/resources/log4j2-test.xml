@@ -9,6 +9,7 @@
 		</File>
 	</Appenders>
 	<Loggers>
+		<Logger name="org.gradle.api.internal.tasks.testing.worker" level="info" />
 		<Logger name="org.junit.platform" level="info" />
 		<Logger name="org.springframework.test.context.support" level="info" />
 		<Logger name="org.springframework.test.context" level="warn" />

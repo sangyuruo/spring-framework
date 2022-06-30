@@ -42,6 +42,9 @@ public class AnnotationBeanWiringInfoResolverTests {
 		assertThat(info).as("Must be returning null for a non-@Configurable class instance").isNull();
 	}
 
+	/**
+	 *  BeanWiringInfo： 装配Bean的元数据
+	 */
 	@Test
 	public void testResolveWiringInfoWithAnInstanceOfAnAnnotatedClass() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
