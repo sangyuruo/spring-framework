@@ -980,6 +980,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
 
 		if (beanDefinition instanceof AbstractBeanDefinition) {
+			//Bean定义校验
 			try {
 				((AbstractBeanDefinition) beanDefinition).validate();
 			}
@@ -989,12 +990,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
+		//根据 BeanName 从缓存取 BeanDefinition
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
+			//beanDefinitionMap 已存在 BeanDefinition
 			if (!isAllowBeanDefinitionOverriding()) {
+				//不允许重写，则抛出异常
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
+				//允许重写且已存在 existingDefinition 权限小于传入beanDefinition权限
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				if (logger.isInfoEnabled()) {
 					logger.info("Overriding user-defined bean definition for bean '" + beanName +
@@ -1016,30 +1021,38 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							"] with [" + beanDefinition + "]");
 				}
 			}
+			//覆盖 beanDefinitionMap 中的 beanDefinition
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
 		else {
+			// beanDefinitionMap 不存在 BeanDefinition
 			if (hasBeanCreationStarted()) {
+				//BeanCreation已经开始，则需要加并发控制
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
+					// 将 BeanDefinition 加入 beanDefinitionMap 缓存中
 					this.beanDefinitionMap.put(beanName, beanDefinition);
 					List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
 					updatedDefinitions.addAll(this.beanDefinitionNames);
 					updatedDefinitions.add(beanName);
+					// 将 beanName 加入 beanDefinitionNames 缓存中
 					this.beanDefinitionNames = updatedDefinitions;
 					removeManualSingletonName(beanName);
 				}
 			}
 			else {
+				//BeanCreation未开始，则无需加并发控制
 				// Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);
 				removeManualSingletonName(beanName);
 			}
+			//清空 frozenBeanDefinitionNames 缓存
 			this.frozenBeanDefinitionNames = null;
 		}
 
 		if (existingDefinition != null || containsSingleton(beanName)) {
+			//如果之前已经存在BeanDefinition 或包含该beanName对应的单例实例，则需要reset BeanDefinition
 			resetBeanDefinition(beanName);
 		}
 		else if (isConfigurationFrozen()) {
@@ -1340,9 +1353,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return multipleBeans;
 			}
 			/**
-			 *  beanName: 使用 Autowire 注入功能的 Bean 名称
-			 *  type: 被注入Bean的参数类型
-			 *  descriptor: 被注入的依赖Bean的信息
+			 *  比如 AnnotatedBean 它有一个field是 TestBean, 采用了@Autowired 注入. 则
+			 *  beanName: 使用 Autowire 注入功能的 Bean 名称， 这里是 annotatedBean
+			 *  type: 被注入Bean的参数类型,  这里是 TestBean.
+			 *  descriptor: 被注入的依赖Bean的信息,  这里是 TestBean 的信息
 			 *  这里根据上面三者来找到合适的被依赖Bean
 			 */
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
