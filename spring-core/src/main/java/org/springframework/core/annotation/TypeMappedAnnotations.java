@@ -144,6 +144,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 			@Nullable MergedAnnotationSelector<A> selector) {
 
 		if (this.annotationFilter.matches(annotationType)) {
+			//需要 忽略的 annotationType
 			return MergedAnnotation.missing();
 		}
 		MergedAnnotation<A> result = scan(annotationType,
@@ -407,9 +408,11 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		@Nullable
 		private MergedAnnotation<A> process(
 				Object type, int aggregateIndex, @Nullable Object source, Annotation annotation) {
-
+			//元数据查找启动顺序: 当前类 > 父类 > ... > 一级父类. 返回元数据的优先度: 一级父类 > ... > 父类 > 当前类
+			//向上（父类）查找，如果父类有合适的元数据，则直接返回父类上的元数据
 			Annotation[] repeatedAnnotations = repeatableContainers.findRepeatedAnnotations(annotation);
 			if (repeatedAnnotations != null) {
+				//父类有的话，则直接返回父类上的元数据
 				return doWithAnnotations(type, aggregateIndex, source, repeatedAnnotations);
 			}
 			AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
@@ -421,6 +424,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 							mapping, source, annotation, aggregateIndex, IntrospectionFailureLogger.INFO);
 					if (candidate != null && (this.predicate == null || this.predicate.test(candidate))) {
 						if (this.selector.isBestCandidate(candidate)) {
+							//找到最适合的候选者
 							return candidate;
 						}
 						updateLastResult(candidate);
